@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:satelite_tracker/features/map/domain/entities/iss_position.dart';
+import 'package:satelite_tracker/core/utils/location_helper.dart';
 import 'package:satelite_tracker/core/utils/permission_helper.dart';
 import 'map_providers.dart';
 import 'iss_provider.dart';
@@ -24,6 +25,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   bool _isPermissionRequested = false;
   Symbol? _issSymbol;
   bool _hasStyleLoaded = false;
+  bool _isIssClose = false;
+  double? _currentDistanceKm;
 
   @override
   void initState() {
@@ -150,6 +153,52 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     });
   }
 
+  Future<void> _checkProximity(IssPosition position) async {
+    final permission = ref.read(locationPermissionProvider);
+    if (!permission.isGranted) {
+      if (_isIssClose) {
+        setState(() {
+          _isIssClose = false;
+          _currentDistanceKm = null;
+        });
+      }
+      return;
+    }
+
+    final controller = ref.read(mapControllerProvider);
+    if (controller == null) return;
+
+    try {
+      final userLatLng = await controller.requestMyLocationLatLng();
+      if (userLatLng != null) {
+        final distance = LocationHelper.calculateDistance(
+          startLatitude: userLatLng.latitude,
+          startLongitude: userLatLng.longitude,
+          endLatitude: position.latitude,
+          endLongitude: position.longitude,
+        );
+
+        final isClose = distance <= LocationHelper.proximityRadiusKm;
+
+        if (isClose != _isIssClose || distance != _currentDistanceKm) {
+          setState(() {
+            _isIssClose = isClose;
+            _currentDistanceKm = distance;
+          });
+        }
+      } else {
+        if (_isIssClose) {
+          setState(() {
+            _isIssClose = false;
+            _currentDistanceKm = null;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error checking proximity: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final permission = ref.watch(locationPermissionProvider);
@@ -158,12 +207,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     ref.listen<PermissionStatus>(locationPermissionProvider, (previous, next) {
       if (next.isGranted) {
         ref.read(trackUserProvider.notifier).state = true;
+        final issState = ref.read(issPositionNotifierProvider);
+        issState.whenData((position) {
+          _checkProximity(position);
+        });
       }
     });
 
     ref.listen<AsyncValue<IssPosition>>(issPositionNotifierProvider, (previous, next) {
       if (next is AsyncData<IssPosition>) {
         _updateIssMarkerPosition();
+        _checkProximity(next.value);
       } else if (next is AsyncError) {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -221,7 +275,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             },
           ),
 
-          MapHeader(permissionStatus: permission),
+          MapHeader(
+            permissionStatus: permission,
+            isIssClose: _isIssClose,
+            currentDistanceKm: _currentDistanceKm,
+            onLongPress: () {
+              setState(() {
+                _isIssClose = !_isIssClose;
+                if (_isIssClose) {
+                  _currentDistanceKm = 120.45;
+                } else {
+                  _currentDistanceKm = null;
+                }
+              });
+            },
+          ),
 
           MapControls(
             controller: controller,
