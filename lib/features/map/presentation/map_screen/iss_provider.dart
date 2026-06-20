@@ -66,3 +66,12 @@ final issPositionNotifierProvider =
 final trackIssProvider = StateProvider<bool>((ref) {
   return false; // Automatically follow ISS by default
 });
+
+final issCountdownProvider = StreamProvider<int>((ref) async* {
+  ref.watch(issPositionNotifierProvider);
+  yield 60;
+  yield* Stream.periodic(
+    const Duration(seconds: 1),
+    (i) => 59 - i,
+  ).take(60);
+});

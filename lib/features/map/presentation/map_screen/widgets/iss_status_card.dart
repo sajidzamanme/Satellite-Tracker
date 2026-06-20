@@ -12,6 +12,9 @@ class IssStatusCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final issState = ref.watch(issPositionNotifierProvider);
     final permission = ref.watch(locationPermissionProvider);
+    final countdownAsync = ref.watch(issCountdownProvider);
+    final countdown = countdownAsync.value ?? 00;
+    
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
     final bottomOffset = permission.isGranted ? bottomPadding + 8 : bottomPadding + 94.0;
 
@@ -104,8 +107,12 @@ class IssStatusCard extends ConsumerWidget {
                   data: (position) {
                     final latStr = position.latitude.toStringAsFixed(4);
                     final lonStr = position.longitude.toStringAsFixed(4);
-                    final time = DateTime.fromMillisecondsSinceEpoch(position.timestamp * 1000);
-                    final formattedTime = "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}:${time.second.toString().padLeft(2, '0')}";
+                    final localTime = DateTime.fromMillisecondsSinceEpoch(position.timestamp * 1000);
+                    final utcTime = localTime.toUtc();
+                    String formatTime(DateTime dt) =>
+                        "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}";
+                    final localTimeStr = formatTime(localTime);
+                    final utcTimeStr = formatTime(utcTime);
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,12 +140,20 @@ class IssStatusCard extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                        const SizedBox(height: 5),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Last API fetch: $formattedTime',
+                              'Countdown: ${countdown}s',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                fontSize: 10,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                            Text(
+                              'Fetched: $localTimeStr | $utcTimeStr UTC',
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                                 fontSize: 10,
