@@ -12,7 +12,7 @@ class MapStyles {
 }
 
 final locationPermissionProvider =
-    StateNotifierProvider<LocationPermissionNotifier, PermissionStatus>((ref) {
+    NotifierProvider<LocationPermissionNotifier, PermissionStatus>(() {
   return LocationPermissionNotifier();
 });
 
@@ -20,9 +20,15 @@ final mapControllerProvider = StateProvider<MapLibreMapController?>((ref) {
   return null;
 });
 
-class LocationPermissionNotifier extends StateNotifier<PermissionStatus> {
-  LocationPermissionNotifier() : super(PermissionStatus.denied) {
+final trackUserProvider = StateProvider<bool>((ref) {
+  return false;
+});
+
+class LocationPermissionNotifier extends Notifier<PermissionStatus> {
+  @override
+  PermissionStatus build() {
     checkPermission();
+    return PermissionStatus.denied;
   }
 
   Future<void> checkPermission() async {

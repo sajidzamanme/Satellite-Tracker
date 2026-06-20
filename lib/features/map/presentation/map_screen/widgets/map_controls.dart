@@ -1,8 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
+import 'package:satelite_tracker/features/map/presentation/map_screen/iss_provider.dart';
+import 'package:satelite_tracker/features/map/presentation/map_screen/map_providers.dart';
 
-class MapControls extends StatelessWidget {
+class MapControls extends ConsumerWidget {
   final MapLibreMapController? controller;
   final VoidCallback onZoomToUser;
   final bool isLoading;
@@ -15,7 +18,10 @@ class MapControls extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final trackIss = ref.watch(trackIssProvider);
+    final trackUser = ref.watch(trackUserProvider);
+
     return Positioned(
       right: 16,
       top: MediaQuery.of(context).size.height * 0.25,
@@ -43,6 +49,18 @@ class MapControls extends StatelessWidget {
             icon: Icons.my_location,
             onPressed: onZoomToUser,
             isLoading: isLoading,
+            isActive: trackUser,
+            activeColor: Colors.blueAccent,
+          ),
+          const SizedBox(height: 12),
+          _buildFloatingButton(
+            context,
+            icon: Icons.satellite_alt,
+            onPressed: () {
+              ref.read(trackIssProvider.notifier).state = !trackIss;
+            },
+            isActive: trackIss,
+            activeColor: Colors.blueAccent,
           ),
         ],
       ),
@@ -54,7 +72,19 @@ class MapControls extends StatelessWidget {
     required IconData icon,
     required VoidCallback onPressed,
     bool isLoading = false,
+    bool isActive = false,
+    Color? activeColor,
   }) {
+    final buttonColor = isActive && activeColor != null
+        ? activeColor.withValues(alpha: 0.6)
+        : Theme.of(context).colorScheme.surface.withValues(alpha: 0.6);
+    final borderColor = isActive && activeColor != null
+        ? activeColor
+        : Theme.of(context).colorScheme.outline;
+    final iconColor = isActive && activeColor != null
+        ? Colors.white
+        : Theme.of(context).colorScheme.onSurface;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: BackdropFilter(
@@ -65,8 +95,8 @@ class MapControls extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.6),
-              border: Border.all(color: Theme.of(context).colorScheme.outline, width: 1),
+              color: buttonColor,
+              border: Border.all(color: borderColor, width: 1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
@@ -79,7 +109,7 @@ class MapControls extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     )
-                  : Icon(icon, color: Theme.of(context).colorScheme.onSurface, size: 20),
+                  : Icon(icon, color: iconColor, size: 20),
             ),
           ),
         ),

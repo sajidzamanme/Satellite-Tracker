@@ -12,7 +12,7 @@ class LocationPermissionBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 24,
+      bottom: MediaQuery.paddingOf(context).bottom + 8.0,
       left: 16,
       right: 16,
       child: ClipRRect(

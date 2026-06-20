@@ -1,12 +1,17 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:satelite_tracker/features/map/domain/entities/iss_position.dart';
 import 'package:satelite_tracker/utils/permission_helper.dart';
 import 'map_providers.dart';
+import 'iss_provider.dart';
 import 'widgets/map_header.dart';
 import 'widgets/map_controls.dart';
 import 'widgets/location_permission_banner.dart';
+import 'widgets/iss_status_card.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -17,6 +22,8 @@ class MapScreen extends ConsumerStatefulWidget {
 
 class _MapScreenState extends ConsumerState<MapScreen> {
   bool _isPermissionRequested = false;
+  Symbol? _issSymbol;
+  bool _hasStyleLoaded = false;
 
   @override
   void initState() {
@@ -56,6 +63,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (permission.isGranted) {
       final controller = ref.read(mapControllerProvider);
       if (controller != null) {
+        ref.read(trackIssProvider.notifier).state = false;
+        ref.read(trackUserProvider.notifier).state = true;
         controller.updateMyLocationTrackingMode(MyLocationTrackingMode.tracking);
       }
     } else {
@@ -83,6 +92,57 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     );
   }
 
+  Future<void> _onStyleLoaded() async {
+    final controller = ref.read(mapControllerProvider);
+    if (controller != null) {
+      final ByteData data = await rootBundle.load('assets/images/satellite.png');
+      final Uint8List markerBytes = data.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
+      await controller.addImage('iss_marker_icon', markerBytes);
+      _hasStyleLoaded = true;
+      _updateIssMarkerPosition();
+    }
+  }
+
+  Future<void> _updateIssMarkerPosition() async {
+    if (!_hasStyleLoaded) return;
+    
+    final controller = ref.read(mapControllerProvider);
+    if (controller == null) return;
+
+    final issState = ref.read(issPositionNotifierProvider);
+    issState.whenData((position) async {
+      final targetLatLng = LatLng(position.latitude, position.longitude);
+
+      if (_issSymbol == null) {
+        _issSymbol = await controller.addSymbol(
+          SymbolOptions(
+            geometry: targetLatLng,
+            iconImage: 'iss_marker_icon',
+            iconSize: 0.25,
+            iconAnchor: 'center',
+          ),
+        );
+      } else {
+        await controller.updateSymbol(
+          _issSymbol!,
+          SymbolOptions(
+            geometry: targetLatLng,
+          ),
+        );
+      }
+
+      final trackIss = ref.read(trackIssProvider);
+      if (trackIss) {
+        controller.animateCamera(
+          CameraUpdate.newLatLngZoom(targetLatLng, 3.5),
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final permission = ref.watch(locationPermissionProvider);
@@ -90,10 +150,44 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     ref.listen<PermissionStatus>(locationPermissionProvider, (previous, next) {
       if (next.isGranted) {
+        ref.read(trackUserProvider.notifier).state = true;
+        ref.read(trackIssProvider.notifier).state = false;
         final currentController = ref.read(mapControllerProvider);
         if (currentController != null) {
           currentController.updateMyLocationTrackingMode(MyLocationTrackingMode.tracking);
         }
+      }
+    });
+
+    ref.listen<AsyncValue<IssPosition>>(issPositionNotifierProvider, (previous, next) {
+      if (next is AsyncData<IssPosition>) {
+        _updateIssMarkerPosition();
+      } else if (next is AsyncError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating ISS position: ${next.error}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    });
+
+    ref.listen<bool>(trackUserProvider, (previous, next) {
+      final currentController = ref.read(mapControllerProvider);
+      if (currentController != null) {
+        if (next) {
+          ref.read(trackIssProvider.notifier).state = false;
+          currentController.updateMyLocationTrackingMode(MyLocationTrackingMode.tracking);
+        } else {
+          currentController.updateMyLocationTrackingMode(MyLocationTrackingMode.none);
+        }
+      }
+    });
+
+    ref.listen<bool>(trackIssProvider, (previous, next) {
+      if (next) {
+        ref.read(trackUserProvider.notifier).state = false;
+        _updateIssMarkerPosition();
       }
     });
 
@@ -114,8 +208,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             onMapCreated: (MapLibreMapController mapController) {
               ref.read(mapControllerProvider.notifier).state = mapController;
               if (permission.isGranted) {
+                ref.read(trackUserProvider.notifier).state = true;
                 mapController.updateMyLocationTrackingMode(MyLocationTrackingMode.tracking);
               }
+            },
+            onStyleLoadedCallback: _onStyleLoaded,
+            onCameraTrackingDismissed: () {
+              ref.read(trackUserProvider.notifier).state = false;
             },
           ),
 
@@ -126,6 +225,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             onZoomToUser: _zoomToUser,
             isLoading: _isPermissionRequested,
           ),
+
+          const IssStatusCard(),
 
           if (!permission.isGranted)
             LocationPermissionBanner(
