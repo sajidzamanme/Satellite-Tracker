@@ -14,6 +14,7 @@ class IssStatusCard extends ConsumerWidget {
     final permission = ref.watch(locationPermissionProvider);
     final countdownAsync = ref.watch(issCountdownProvider);
     final countdown = countdownAsync.value ?? 00;
+    final countryState = ref.watch(issCountryProvider);
     
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
     final bottomOffset = permission.isGranted ? bottomPadding + 8 : bottomPadding + 94.0;
@@ -140,7 +141,104 @@ class IssStatusCard extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 5),
+                        const SizedBox(height: 12),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Country / Region',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                                  fontSize: 10,
+                                  letterSpacing: 1.0,
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              countryState.when(
+                                data: (country) => Text(
+                                  country,
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                                loading: () => Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const SizedBox(
+                                      width: 10,
+                                      height: 10,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 1.5,
+                                        color: Colors.blueAccent,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Searching region...',
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                        fontSize: 12,
+                                        fontStyle: FontStyle.italic,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                error: (err, _) => Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Error loading region',
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.error,
+                                        fontSize: 12,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    InkWell(
+                                      onTap: () {
+                                        ref.invalidate(issCountryProvider);
+                                      },
+                                      borderRadius: BorderRadius.circular(4),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.refresh,
+                                              size: 12,
+                                              color: Theme.of(context).colorScheme.primary,
+                                            ),
+                                            const SizedBox(width: 2),
+                                            Text(
+                                              'Retry',
+                                              style: TextStyle(
+                                                color: Theme.of(context).colorScheme.primary,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily: 'monospace',
+                                                decoration: TextDecoration.underline,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 10),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

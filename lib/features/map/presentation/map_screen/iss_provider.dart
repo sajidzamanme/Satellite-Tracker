@@ -6,6 +6,7 @@ import 'package:satelite_tracker/features/map/data/repositories/map_repository_i
 import 'package:satelite_tracker/features/map/domain/entities/iss_position.dart';
 import 'package:satelite_tracker/features/map/domain/repositories/map_repository.dart';
 import 'package:satelite_tracker/features/map/domain/usecases/get_iss_position.dart';
+import 'package:satelite_tracker/features/map/domain/usecases/get_country_or_region.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   return Dio();
@@ -21,6 +22,10 @@ final mapRepositoryProvider = Provider<MapRepository>((ref) {
 
 final getIssPositionUseCaseProvider = Provider<GetIssPosition>((ref) {
   return GetIssPosition(ref.watch(mapRepositoryProvider));
+});
+
+final getCountryOrRegionUseCaseProvider = Provider<GetCountryOrRegion>((ref) {
+  return GetCountryOrRegion(ref.watch(mapRepositoryProvider));
 });
 
 class IssPositionNotifier extends AsyncNotifier<IssPosition> {
@@ -74,4 +79,16 @@ final issCountdownProvider = StreamProvider<int>((ref) async* {
     const Duration(seconds: 1),
     (i) => 59 - i,
   ).take(60);
+});
+
+final issCountryProvider = FutureProvider<String>((ref) async {
+  final issState = ref.watch(issPositionNotifierProvider);
+  return issState.when(
+    data: (position) async {
+      final usecase = ref.read(getCountryOrRegionUseCaseProvider);
+      return usecase(latitude: position.latitude, longitude: position.longitude);
+    },
+    error: (err, stack) => 'Error loading location',
+    loading: () => Completer<String>().future,
+  );
 });

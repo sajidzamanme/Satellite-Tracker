@@ -11,4 +11,9 @@ class MapRepositoryImpl implements MapRepository {
   Future<IssPosition> getIssPosition() {
     return remoteDataSource.getIssPosition();
   }
+
+  @override
+  Future<String> getCountryOrRegion({required double latitude, required double longitude}) {
+    return remoteDataSource.getCountryOrRegion(latitude: latitude, longitude: longitude);
+  }
 }
