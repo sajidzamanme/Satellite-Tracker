@@ -40,8 +40,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   Future<void> _initLocationPermission() async {
-    await ref.read(locationPermissionProvider.notifier).checkPermission();
-    final permission = ref.read(locationPermissionProvider);
+    final permission = await ref.read(locationPermissionProvider.notifier).checkPermission();
     if (!permission.isGranted) {
       await _requestLocation();
     }
@@ -63,9 +62,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (permission.isGranted) {
       final controller = ref.read(mapControllerProvider);
       if (controller != null) {
-        ref.read(trackIssProvider.notifier).state = false;
         ref.read(trackUserProvider.notifier).state = true;
-        controller.updateMyLocationTrackingMode(MyLocationTrackingMode.tracking);
       }
     } else {
       await _requestLocation();
@@ -77,19 +74,29 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   void _showSettingsSnackBar() {
+    ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text(
           'Location permission permanently denied. Enable in Settings.',
         ),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 4),
         action: SnackBarAction(
           label: 'SETTINGS',
           onPressed: () {
+            ScaffoldMessenger.of(context).clearSnackBars();
             PermissionHelper.openSettings();
           },
         ),
       ),
     );
+    
+    Future.delayed(const Duration(seconds: 4), () {
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      }
+    });
   }
 
   Future<void> _onStyleLoaded() async {
@@ -151,11 +158,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     ref.listen<PermissionStatus>(locationPermissionProvider, (previous, next) {
       if (next.isGranted) {
         ref.read(trackUserProvider.notifier).state = true;
-        ref.read(trackIssProvider.notifier).state = false;
-        final currentController = ref.read(mapControllerProvider);
-        if (currentController != null) {
-          currentController.updateMyLocationTrackingMode(MyLocationTrackingMode.tracking);
-        }
       }
     });
 
@@ -163,10 +165,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       if (next is AsyncData<IssPosition>) {
         _updateIssMarkerPosition();
       } else if (next is AsyncError) {
+        ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error updating ISS position: ${next.error}'),
             backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -209,7 +213,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               ref.read(mapControllerProvider.notifier).state = mapController;
               if (permission.isGranted) {
                 ref.read(trackUserProvider.notifier).state = true;
-                mapController.updateMyLocationTrackingMode(MyLocationTrackingMode.tracking);
               }
             },
             onStyleLoadedCallback: _onStyleLoaded,

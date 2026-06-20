@@ -43,6 +43,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
         await ref.read(authControllerProvider.notifier).signInAnonymously();
     if (!success && mounted) {
       final error = ref.read(authControllerProvider).error;
+      ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -144,7 +145,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
 
                       // Application Subtitle
                       Text(
-                        'Real-time Internation Space Station tracking',
+                        'Real-time International Space Station tracking',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,

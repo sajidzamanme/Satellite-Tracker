@@ -32,7 +32,7 @@ class MapHeader extends StatelessWidget {
                 Expanded(
                   flex: 3,
                   child: Text(
-                    'SATELITE TRACKER',
+                    'SATELLITE TRACKER',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 18,

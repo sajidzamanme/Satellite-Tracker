@@ -27,15 +27,18 @@ final trackUserProvider = StateProvider<bool>((ref) {
 class LocationPermissionNotifier extends Notifier<PermissionStatus> {
   @override
   PermissionStatus build() {
-    checkPermission();
     return PermissionStatus.denied;
   }
 
-  Future<void> checkPermission() async {
-    state = await PermissionHelper.checkLocationPermissionStatus();
+  Future<PermissionStatus> checkPermission() async {
+    final status = await PermissionHelper.checkLocationPermissionStatus();
+    state = status;
+    return status;
   }
 
-  Future<void> requestPermission() async {
-    state = await PermissionHelper.requestLocationPermission();
+  Future<PermissionStatus> requestPermission() async {
+    final status = await PermissionHelper.requestLocationPermission();
+    state = status;
+    return status;
   }
 }
