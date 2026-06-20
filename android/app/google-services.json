@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "873559800642",
+    "project_id": "satelite-tracker-36ed8",
+    "storage_bucket": "satelite-tracker-36ed8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:873559800642:android:1d8d792d35a060c47f26db",
+        "android_client_info": {
+          "package_name": "com.example.satelite_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjtLy-XvbjH76gkHArpt3_YC8JnYYiEL0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

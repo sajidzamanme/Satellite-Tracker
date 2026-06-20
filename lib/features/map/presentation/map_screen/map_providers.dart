@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:satelite_tracker/utils/permission_helper.dart';
+import 'package:satelite_tracker/core/utils/permission_helper.dart';
 
 class MapStyles {
   MapStyles._();
