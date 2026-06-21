@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:satelite_tracker/features/auth/presentation/auth_providers.dart';
-import 'package:satelite_tracker/features/auth/presentation/auth_screen.dart';
-import 'package:satelite_tracker/features/map/presentation/map_screen/map_screen.dart';
+import 'package:satelite_tracker/features/auth/presentation/pages/auth_screen.dart';
+import 'package:satelite_tracker/features/auth/presentation/providers/auth_providers.dart';
+import 'package:satelite_tracker/features/map/presentation/pages/map_screen.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;

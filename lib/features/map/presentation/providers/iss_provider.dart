@@ -1,16 +1,12 @@
 import 'dart:async';
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:satelite_tracker/core/network/dio_provider.dart';
 import 'package:satelite_tracker/features/map/data/datasources/map_remote_data_source.dart';
 import 'package:satelite_tracker/features/map/data/repositories/map_repository_impl.dart';
 import 'package:satelite_tracker/features/map/domain/entities/iss_position.dart';
 import 'package:satelite_tracker/features/map/domain/repositories/map_repository.dart';
 import 'package:satelite_tracker/features/map/domain/usecases/get_iss_position.dart';
 import 'package:satelite_tracker/features/map/domain/usecases/get_country_or_region.dart';
-
-final dioProvider = Provider<Dio>((ref) {
-  return Dio();
-});
 
 final mapRemoteDataSourceProvider = Provider<MapRemoteDataSource>((ref) {
   return MapRemoteDataSourceImpl(ref.watch(dioProvider));

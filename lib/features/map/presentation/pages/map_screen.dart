@@ -7,12 +7,12 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:satelite_tracker/features/map/domain/entities/iss_position.dart';
 import 'package:satelite_tracker/core/utils/location_helper.dart';
 import 'package:satelite_tracker/core/utils/permission_helper.dart';
-import 'map_providers.dart';
-import 'iss_provider.dart';
-import 'widgets/map_header.dart';
-import 'widgets/map_controls.dart';
-import 'widgets/location_permission_banner.dart';
-import 'widgets/iss_status_card.dart';
+import 'package:satelite_tracker/features/map/presentation/providers/iss_provider.dart';
+import 'package:satelite_tracker/features/map/presentation/providers/map_providers.dart';
+import 'package:satelite_tracker/features/map/presentation/widgets/iss_status_card.dart';
+import 'package:satelite_tracker/features/map/presentation/widgets/location_permission_banner.dart';
+import 'package:satelite_tracker/features/map/presentation/widgets/map_controls.dart';
+import 'package:satelite_tracker/features/map/presentation/widgets/map_header.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
