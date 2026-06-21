@@ -1,4 +1,4 @@
-import 'package:satelite_tracker/features/map/domain/entities/iss_position.dart';
+import 'package:satelite_tracker/domain/entities/iss_position.dart';
 
 abstract class MapRepository {
   Future<IssPosition> getIssPosition();

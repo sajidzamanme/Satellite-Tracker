@@ -1,4 +1,4 @@
-import 'package:satelite_tracker/features/map/domain/entities/iss_position.dart';
+import 'package:satelite_tracker/domain/entities/iss_position.dart';
 
 class IssPositionModel extends IssPosition {
   const IssPositionModel({

@@ -1,5 +1,5 @@
-import 'package:satelite_tracker/features/map/domain/entities/iss_position.dart';
-import 'package:satelite_tracker/features/map/domain/repositories/map_repository.dart';
+import 'package:satelite_tracker/domain/entities/iss_position.dart';
+import 'package:satelite_tracker/domain/repositories/map_repository.dart';
 
 class GetIssPosition {
   final MapRepository repository;

@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:satelite_tracker/features/map/data/models/iss_position_model.dart';
+import 'package:satelite_tracker/data/models/iss_position_model.dart';
 
 abstract class MapRemoteDataSource {
   Future<IssPositionModel> getIssPosition();

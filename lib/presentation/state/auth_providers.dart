@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:satelite_tracker/features/auth/data/repositories/auth_repository_impl.dart';
-import 'package:satelite_tracker/features/auth/domain/repositories/auth_repository.dart';
+import 'package:satelite_tracker/data/repositories/auth_repository_impl.dart';
+import 'package:satelite_tracker/domain/repositories/auth_repository.dart';
 
 final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
   return FirebaseAuth.instance;

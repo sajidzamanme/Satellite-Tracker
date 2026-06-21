@@ -1,4 +1,4 @@
-import 'package:satelite_tracker/features/map/domain/repositories/map_repository.dart';
+import 'package:satelite_tracker/domain/repositories/map_repository.dart';
 
 class GetCountryOrRegion {
   final MapRepository repository;

@@ -2,8 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
-import 'package:satelite_tracker/features/map/presentation/map_screen/iss_provider.dart';
-import 'package:satelite_tracker/features/map/presentation/map_screen/map_providers.dart';
+import 'package:satelite_tracker/presentation/state/iss_provider.dart';
+import 'package:satelite_tracker/presentation/state/map_providers.dart';
 
 class MapControls extends ConsumerWidget {
   final MapLibreMapController? controller;
