@@ -1,23 +1,29 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:satelite_tracker/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:satelite_tracker/features/auth/domain/repositories/auth_repository.dart';
 
-final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
-  return FirebaseAuth.instance;
-});
+part 'auth_providers.g.dart';
 
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
+@riverpod
+FirebaseAuth firebaseAuth(FirebaseAuthRef ref) {
+  return FirebaseAuth.instance;
+}
+
+@riverpod
+AuthRepository authRepository(AuthRepositoryRef ref) {
   final auth = ref.watch(firebaseAuthProvider);
   return AuthRepositoryImpl(auth);
-});
+}
 
-final authStateProvider = StreamProvider<User?>((ref) {
+@riverpod
+Stream<User?> authState(AuthStateRef ref) {
   return ref.watch(authRepositoryProvider).authStateChanges;
-});
+}
 
-class AuthController extends AutoDisposeAsyncNotifier<void> {
+@riverpod
+class AuthController extends _$AuthController {
   @override
   FutureOr<void> build() {}
 
@@ -41,8 +47,3 @@ class AuthController extends AutoDisposeAsyncNotifier<void> {
     );
   }
 }
-
-final authControllerProvider =
-    AsyncNotifierProvider.autoDispose<AuthController, void>(() {
-      return AuthController();
-    });
