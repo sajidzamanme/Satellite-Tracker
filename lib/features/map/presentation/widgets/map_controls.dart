@@ -57,7 +57,7 @@ class MapControls extends ConsumerWidget {
             context,
             icon: Icons.satellite_alt,
             onPressed: () {
-              ref.read(trackIssProvider.notifier).state = !trackIss;
+              ref.read(trackIssProvider.notifier).toggle();
             },
             isActive: trackIss,
             activeColor: Colors.blueAccent,

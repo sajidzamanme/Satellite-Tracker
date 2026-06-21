@@ -1,7 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final dioProvider = Provider<Dio>((ref) {
+part 'dio_provider.g.dart';
+
+@Riverpod(keepAlive: true)
+Dio dio(DioRef ref) {
   final dio = Dio(
     BaseOptions(
       connectTimeout: const Duration(seconds: 10),
@@ -19,4 +22,4 @@ final dioProvider = Provider<Dio>((ref) {
   ));
 
   return dio;
-});
+}

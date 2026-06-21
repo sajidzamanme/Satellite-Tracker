@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:satelite_tracker/features/auth/presentation/pages/auth_screen.dart';
 import 'package:satelite_tracker/features/auth/presentation/providers/auth_providers.dart';
 import 'package:satelite_tracker/features/map/presentation/pages/map_screen.dart';
+
+part 'router.g.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
@@ -18,13 +21,14 @@ class RouterNotifier extends ChangeNotifier {
   }
 }
 
-final routerNotifierProvider = Provider<RouterNotifier>((ref) {
+@Riverpod(keepAlive: true)
+RouterNotifier routerNotifier(RouterNotifierRef ref) {
   return RouterNotifier(ref);
-});
+}
 
-final routerProvider = Provider<GoRouter>((ref) {
+@Riverpod(keepAlive: true)
+GoRouter router(RouterRef ref) {
   final notifier = ref.watch(routerNotifierProvider);
-  final authState = ref.watch(authStateProvider);
 
   return GoRouter(
     initialLocation: '/login',
@@ -40,6 +44,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
     redirect: (context, state) {
+      final authState = ref.read(authStateProvider);
+
       if (authState.isLoading) {
         return null;
       }
@@ -56,4 +62,4 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
   );
-});
+}

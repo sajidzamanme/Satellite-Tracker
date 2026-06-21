@@ -38,7 +38,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   void dispose() {
-    ref.read(mapControllerProvider.notifier).state = null;
+    ref.read(mapControllerProvider.notifier).setController(null);
     super.dispose();
   }
 
@@ -65,7 +65,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (permission.isGranted) {
       final controller = ref.read(mapControllerProvider);
       if (controller != null) {
-        ref.read(trackUserProvider.notifier).state = true;
+        ref.read(trackUserProvider.notifier).setTracking(true);
       }
     } else {
       await _requestLocation();
@@ -206,7 +206,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     ref.listen<PermissionStatus>(locationPermissionProvider, (previous, next) {
       if (next.isGranted) {
-        ref.read(trackUserProvider.notifier).state = true;
+        ref.read(trackUserProvider.notifier).setTracking(true);
         final issState = ref.read(issPositionNotifierProvider);
         issState.whenData((position) {
           _checkProximity(position);
@@ -234,7 +234,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       final currentController = ref.read(mapControllerProvider);
       if (currentController != null) {
         if (next) {
-          ref.read(trackIssProvider.notifier).state = false;
+          ref.read(trackIssProvider.notifier).setTracking(false);
           currentController.updateMyLocationTrackingMode(MyLocationTrackingMode.tracking);
         } else {
           currentController.updateMyLocationTrackingMode(MyLocationTrackingMode.none);
@@ -244,7 +244,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     ref.listen<bool>(trackIssProvider, (previous, next) {
       if (next) {
-        ref.read(trackUserProvider.notifier).state = false;
+        ref.read(trackUserProvider.notifier).setTracking(false);
         _updateIssMarkerPosition();
       }
     });
@@ -264,14 +264,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 ? MyLocationTrackingMode.tracking
                 : MyLocationTrackingMode.none,
             onMapCreated: (MapLibreMapController mapController) {
-              ref.read(mapControllerProvider.notifier).state = mapController;
+              ref.read(mapControllerProvider.notifier).setController(mapController);
               if (permission.isGranted) {
-                ref.read(trackUserProvider.notifier).state = true;
+                ref.read(trackUserProvider.notifier).setTracking(true);
               }
             },
             onStyleLoadedCallback: _onStyleLoaded,
             onCameraTrackingDismissed: () {
-              ref.read(trackUserProvider.notifier).state = false;
+              ref.read(trackUserProvider.notifier).setTracking(false);
             },
           ),
 

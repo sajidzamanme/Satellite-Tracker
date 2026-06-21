@@ -1,7 +1,9 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:satelite_tracker/core/utils/permission_helper.dart';
+
+part 'map_providers.g.dart';
 
 class MapStyles {
   MapStyles._();
@@ -11,20 +13,8 @@ class MapStyles {
   static const String sateliteMap = 'https://api.maptiler.com/maps/hybrid-v4/style.json?key=$_apiKey';
 }
 
-final locationPermissionProvider =
-    NotifierProvider<LocationPermissionNotifier, PermissionStatus>(() {
-  return LocationPermissionNotifier();
-});
-
-final mapControllerProvider = StateProvider<MapLibreMapController?>((ref) {
-  return null;
-});
-
-final trackUserProvider = StateProvider<bool>((ref) {
-  return false;
-});
-
-class LocationPermissionNotifier extends Notifier<PermissionStatus> {
+@Riverpod(keepAlive: true)
+class LocationPermission extends _$LocationPermission {
   @override
   PermissionStatus build() {
     return PermissionStatus.denied;
@@ -40,5 +30,29 @@ class LocationPermissionNotifier extends Notifier<PermissionStatus> {
     final status = await PermissionHelper.requestLocationPermission();
     state = status;
     return status;
+  }
+}
+
+@Riverpod(keepAlive: true)
+class MapController extends _$MapController {
+  @override
+  MapLibreMapController? build() => null;
+
+  void setController(MapLibreMapController? controller) {
+    state = controller;
+  }
+}
+
+@Riverpod(keepAlive: true)
+class TrackUser extends _$TrackUser {
+  @override
+  bool build() => false;
+
+  void setTracking(bool value) {
+    state = value;
+  }
+
+  void toggle() {
+    state = !state;
   }
 }

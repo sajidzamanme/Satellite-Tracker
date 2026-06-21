@@ -6,11 +6,11 @@ part of 'auth_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$firebaseAuthHash() => r'46c40b7c5cf8ab936c0daa96a6af106bd2ae5d51';
+String _$firebaseAuthHash() => r'7791bf70ce0f01bf991a53a76abc915478673c0b';
 
 /// See also [firebaseAuth].
 @ProviderFor(firebaseAuth)
-final firebaseAuthProvider = Provider<FirebaseAuth>.internal(
+final firebaseAuthProvider = AutoDisposeProvider<FirebaseAuth>.internal(
   firebaseAuth,
   name: r'firebaseAuthProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -22,12 +22,12 @@ final firebaseAuthProvider = Provider<FirebaseAuth>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef FirebaseAuthRef = ProviderRef<FirebaseAuth>;
-String _$authRepositoryHash() => r'3c1fba22652cdec5c662fc55c19f6d7792eb44d2';
+typedef FirebaseAuthRef = AutoDisposeProviderRef<FirebaseAuth>;
+String _$authRepositoryHash() => r'afdb27ecc0fd0a9057f7c375e6ab299832e4e670';
 
 /// See also [authRepository].
 @ProviderFor(authRepository)
-final authRepositoryProvider = Provider<AuthRepository>.internal(
+final authRepositoryProvider = AutoDisposeProvider<AuthRepository>.internal(
   authRepository,
   name: r'authRepositoryProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -39,12 +39,12 @@ final authRepositoryProvider = Provider<AuthRepository>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef AuthRepositoryRef = ProviderRef<AuthRepository>;
-String _$authStateHash() => r'ba903f219ae0cb28d51cb6b5451a91e695c98409';
+typedef AuthRepositoryRef = AutoDisposeProviderRef<AuthRepository>;
+String _$authStateHash() => r'132c5c557707d07a9765c35ab6e56b9b31e15981';
 
 /// See also [authState].
 @ProviderFor(authState)
-final authStateProvider = StreamProvider<User?>.internal(
+final authStateProvider = AutoDisposeStreamProvider<User?>.internal(
   authState,
   name: r'authStateProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -56,7 +56,7 @@ final authStateProvider = StreamProvider<User?>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef AuthStateRef = StreamProviderRef<User?>;
+typedef AuthStateRef = AutoDisposeStreamProviderRef<User?>;
 String _$authControllerHash() => r'6841a901d63765719fab4516f31cda56b69d7524';
 
 /// See also [AuthController].
