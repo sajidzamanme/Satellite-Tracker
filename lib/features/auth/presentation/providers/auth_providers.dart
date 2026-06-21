@@ -21,22 +21,24 @@ class AuthController extends AutoDisposeAsyncNotifier<void> {
   @override
   FutureOr<void> build() {}
 
-  Future<bool> signInAnonymously() async {
+  Future<void> signInAnonymously() async {
     state = const AsyncValue.loading();
     final repository = ref.read(authRepositoryProvider);
-    final result = await AsyncValue.guard(() => repository.signInAnonymously());
-    if (result.hasError) {
-      state = AsyncValue.error(result.error!, result.stackTrace!);
-      return false;
-    }
-    state = const AsyncValue.data(null);
-    return true;
+    final result = await repository.signInAnonymously();
+    state = result.fold(
+      (failure) => AsyncValue.error(failure, StackTrace.current),
+      (_) => const AsyncValue.data(null),
+    );
   }
 
   Future<void> signOut() async {
     state = const AsyncValue.loading();
     final repository = ref.read(authRepositoryProvider);
-    state = await AsyncValue.guard(() => repository.signOut());
+    final result = await repository.signOut();
+    state = result.fold(
+      (failure) => AsyncValue.error(failure, StackTrace.current),
+      (_) => const AsyncValue.data(null),
+    );
   }
 }
 

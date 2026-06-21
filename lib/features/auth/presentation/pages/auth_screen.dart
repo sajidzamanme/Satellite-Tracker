@@ -38,23 +38,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     super.dispose();
   }
 
-  Future<void> _handleAnonymousLogin() async {
-    final success =
-        await ref.read(authControllerProvider.notifier).signInAnonymously();
-    if (!success && mounted) {
-      final error = ref.read(authControllerProvider).error;
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Authentication failed: ${error?.toString().split('\n').first ?? "Unknown error"}',
-            style: const TextStyle(fontFamily: 'monospace'),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.error,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+  void _handleAnonymousLogin() {
+    ref.read(authControllerProvider.notifier).signInAnonymously();
   }
 
   @override
@@ -62,6 +47,24 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
     final colorScheme = Theme.of(context).colorScheme;
     final authState = ref.watch(authControllerProvider);
     final isLoading = authState.isLoading;
+
+    ref.listen<AsyncValue<void>>(authControllerProvider, (previous, next) {
+      next.whenOrNull(
+        error: (error, stackTrace) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Authentication failed: ${error.toString().split('\n').first}',
+                style: const TextStyle(fontFamily: 'monospace'),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+      );
+    });
 
     final bgGradient = RadialGradient(
       center: Alignment.center,
