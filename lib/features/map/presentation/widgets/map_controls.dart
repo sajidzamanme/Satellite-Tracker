@@ -6,19 +6,18 @@ import 'package:satelite_tracker/features/map/presentation/providers/iss_provide
 import 'package:satelite_tracker/features/map/presentation/providers/map_providers.dart';
 
 class MapControls extends ConsumerWidget {
-  final MapLibreMapController? controller;
   final VoidCallback onZoomToUser;
   final bool isLoading;
 
   const MapControls({
     super.key,
-    required this.controller,
     required this.onZoomToUser,
     this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(mapControllerProvider);
     final trackIss = ref.watch(trackIssProvider);
     final trackUser = ref.watch(trackUserProvider);
 

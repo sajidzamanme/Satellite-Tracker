@@ -12,8 +12,6 @@ class IssStatusCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final issState = ref.watch(issPositionNotifierProvider);
     final permission = ref.watch(locationPermissionProvider);
-    final countdownAsync = ref.watch(issCountdownProvider);
-    final countdown = countdownAsync.value ?? 00;
     final countryState = ref.watch(issCountryProvider);
     
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
@@ -242,13 +240,19 @@ class IssStatusCard extends ConsumerWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Countdown: ${countdown}s',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                                fontSize: 10,
-                                fontFamily: 'monospace',
-                              ),
+                            Consumer(
+                              builder: (context, ref, _) {
+                                final countdownAsync = ref.watch(issCountdownProvider);
+                                final countdown = countdownAsync.value ?? 0;
+                                return Text(
+                                  'Countdown: ${countdown}s',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                    fontSize: 10,
+                                    fontFamily: 'monospace',
+                                  ),
+                                );
+                              },
                             ),
                             Text(
                               'Fetched: $localTimeStr | $utcTimeStr UTC',

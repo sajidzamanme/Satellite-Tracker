@@ -122,38 +122,41 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final controller = ref.read(mapControllerProvider);
     if (controller == null) return;
 
-    final issState = ref.read(issPositionNotifierProvider);
-    issState.whenData((position) async {
-      final targetLatLng = LatLng(position.latitude, position.longitude);
+    final position = ref.read(issPositionNotifierProvider).value;
+    if (position == null) return;
 
-      if (_issSymbol == null) {
-        _issSymbol = await controller.addSymbol(
-          SymbolOptions(
-            geometry: targetLatLng,
-            iconImage: 'iss_marker_icon',
-            iconSize: 0.25,
-            iconAnchor: 'center',
-          ),
-        );
-      } else {
-        await controller.updateSymbol(
-          _issSymbol!,
-          SymbolOptions(
-            geometry: targetLatLng,
-          ),
-        );
-      }
+    final targetLatLng = LatLng(position.latitude, position.longitude);
 
-      final trackIss = ref.read(trackIssProvider);
-      if (trackIss) {
-        controller.animateCamera(
-          CameraUpdate.newLatLngZoom(targetLatLng, 3.5),
-        );
-      }
-    });
+    if (_issSymbol == null) {
+      _issSymbol = await controller.addSymbol(
+        SymbolOptions(
+          geometry: targetLatLng,
+          iconImage: 'iss_marker_icon',
+          iconSize: 0.25,
+          iconAnchor: 'center',
+        ),
+      );
+    } else {
+      await controller.updateSymbol(
+        _issSymbol!,
+        SymbolOptions(
+          geometry: targetLatLng,
+        ),
+      );
+    }
+
+    final trackIss = ref.read(trackIssProvider);
+    if (trackIss) {
+      controller.animateCamera(
+        CameraUpdate.newLatLngZoom(targetLatLng, 3.5),
+      );
+    }
   }
 
-  Future<void> _checkProximity(IssPosition position) async {
+  Future<void> _checkProximity() async {
+    final position = ref.read(issPositionNotifierProvider).value;
+    if (position == null) return;
+
     final permission = ref.read(locationPermissionProvider);
     if (!permission.isGranted) {
       if (_isIssClose) {
@@ -202,32 +205,25 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final permission = ref.watch(locationPermissionProvider);
-    final controller = ref.watch(mapControllerProvider);
 
     ref.listen<PermissionStatus>(locationPermissionProvider, (previous, next) {
       if (next.isGranted) {
         ref.read(trackUserProvider.notifier).setTracking(true);
-        final issState = ref.read(issPositionNotifierProvider);
-        issState.whenData((position) {
-          _checkProximity(position);
-        });
+        _checkProximity();
       }
     });
 
     ref.listen<MapLibreMapController?>(mapControllerProvider, (previous, next) {
       if (next != null) {
-        final issState = ref.read(issPositionNotifierProvider);
-        issState.whenData((position) {
-          _updateIssMarkerPosition();
-          _checkProximity(position);
-        });
+        _updateIssMarkerPosition();
+        _checkProximity();
       }
     });
 
     ref.listen<AsyncValue<IssPosition>>(issPositionNotifierProvider, (previous, next) {
       if (next is AsyncData<IssPosition>) {
         _updateIssMarkerPosition();
-        _checkProximity(next.value);
+        _checkProximity();
       } else if (next is AsyncError) {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -302,7 +298,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           ),
 
           MapControls(
-            controller: controller,
             onZoomToUser: _zoomToUser,
             isLoading: _isPermissionRequested,
           ),
