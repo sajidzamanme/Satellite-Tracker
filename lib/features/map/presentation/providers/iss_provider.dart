@@ -53,16 +53,17 @@ class IssPositionNotifier extends _$IssPositionNotifier {
 
   Future<IssPosition> _fetch() async {
     final usecase = ref.read(getIssPositionUseCaseProvider);
-    return usecase();
+    final result = await usecase();
+    return result.fold(
+      (failure) => throw failure,
+      (position) => position,
+    );
   }
 
   Future<void> refreshPosition() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final data = await _fetch();
-      _startTimer();
-      return data;
-    });
+    state = await AsyncValue.guard(() => _fetch());
+    _startTimer();
   }
 }
 
@@ -82,7 +83,7 @@ class TrackIss extends _$TrackIss {
 
 @riverpod
 Stream<int> issCountdown(IssCountdownRef ref) async* {
-  ref.watch(issPositionNotifierProvider);
+  ref.watch(issPositionNotifierProvider.select((state) => state.value?.timestamp));
   yield 60;
   yield* Stream.periodic(
     const Duration(seconds: 1),
@@ -92,13 +93,11 @@ Stream<int> issCountdown(IssCountdownRef ref) async* {
 
 @riverpod
 Future<String> issCountry(IssCountryRef ref) async {
-  final issState = ref.watch(issPositionNotifierProvider);
-  return issState.when(
-    data: (position) async {
-      final usecase = ref.read(getCountryOrRegionUseCaseProvider);
-      return usecase(latitude: position.latitude, longitude: position.longitude);
-    },
-    error: (err, stack) => 'Error loading location',
-    loading: () => Completer<String>().future,
+  final position = await ref.watch(issPositionNotifierProvider.future);
+  final usecase = ref.read(getCountryOrRegionUseCaseProvider);
+  final result = await usecase(latitude: position.latitude, longitude: position.longitude);
+  return result.fold(
+    (failure) => throw failure,
+    (country) => country,
   );
 }

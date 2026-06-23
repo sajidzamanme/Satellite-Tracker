@@ -214,6 +214,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       }
     });
 
+    ref.listen<MapLibreMapController?>(mapControllerProvider, (previous, next) {
+      if (next != null) {
+        final issState = ref.read(issPositionNotifierProvider);
+        issState.whenData((position) {
+          _updateIssMarkerPosition();
+          _checkProximity(position);
+        });
+      }
+    });
+
     ref.listen<AsyncValue<IssPosition>>(issPositionNotifierProvider, (previous, next) {
       if (next is AsyncData<IssPosition>) {
         _updateIssMarkerPosition();

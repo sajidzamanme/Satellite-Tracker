@@ -77,7 +77,7 @@ final getCountryOrRegionUseCaseProvider = Provider<GetCountryOrRegion>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef GetCountryOrRegionUseCaseRef = ProviderRef<GetCountryOrRegion>;
-String _$issCountdownHash() => r'a2eb3420fdde744f7acc9f8a62220f05571861af';
+String _$issCountdownHash() => r'ebc04f822ac55c70e863ae1c22a4f386f12b1a7d';
 
 /// See also [issCountdown].
 @ProviderFor(issCountdown)
@@ -94,7 +94,7 @@ final issCountdownProvider = AutoDisposeStreamProvider<int>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef IssCountdownRef = AutoDisposeStreamProviderRef<int>;
-String _$issCountryHash() => r'2a1abf928b09d8edf948e44e6bf7ffc1bc4e3eaa';
+String _$issCountryHash() => r'b38f27507a8f4eab506790200aaf401772d7f7ad';
 
 /// See also [issCountry].
 @ProviderFor(issCountry)
@@ -112,7 +112,7 @@ final issCountryProvider = AutoDisposeFutureProvider<String>.internal(
 // ignore: unused_element
 typedef IssCountryRef = AutoDisposeFutureProviderRef<String>;
 String _$issPositionNotifierHash() =>
-    r'34893454d732c7a5d516e46ca9f19de5e3335093';
+    r'daeb011765ce55b0d1532ec41bc1767e3c88479f';
 
 /// See also [IssPositionNotifier].
 @ProviderFor(IssPositionNotifier)
