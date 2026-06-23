@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:satelite_tracker/core/network/dio_provider.dart';
 import 'package:satelite_tracker/features/map/data/datasources/map_remote_data_source.dart';
 import 'package:satelite_tracker/features/map/data/repositories/map_repository_impl.dart';
 import 'package:satelite_tracker/features/map/domain/entities/iss_position.dart';
@@ -8,27 +8,30 @@ import 'package:satelite_tracker/features/map/domain/repositories/map_repository
 import 'package:satelite_tracker/features/map/domain/usecases/get_iss_position.dart';
 import 'package:satelite_tracker/features/map/domain/usecases/get_country_or_region.dart';
 
-final dioProvider = Provider<Dio>((ref) {
-  return Dio();
-});
+part 'iss_provider.g.dart';
 
-final mapRemoteDataSourceProvider = Provider<MapRemoteDataSource>((ref) {
+@Riverpod(keepAlive: true)
+MapRemoteDataSource mapRemoteDataSource(MapRemoteDataSourceRef ref) {
   return MapRemoteDataSourceImpl(ref.watch(dioProvider));
-});
+}
 
-final mapRepositoryProvider = Provider<MapRepository>((ref) {
+@Riverpod(keepAlive: true)
+MapRepository mapRepository(MapRepositoryRef ref) {
   return MapRepositoryImpl(ref.watch(mapRemoteDataSourceProvider));
-});
+}
 
-final getIssPositionUseCaseProvider = Provider<GetIssPosition>((ref) {
+@Riverpod(keepAlive: true)
+GetIssPosition getIssPositionUseCase(GetIssPositionUseCaseRef ref) {
   return GetIssPosition(ref.watch(mapRepositoryProvider));
-});
+}
 
-final getCountryOrRegionUseCaseProvider = Provider<GetCountryOrRegion>((ref) {
+@Riverpod(keepAlive: true)
+GetCountryOrRegion getCountryOrRegionUseCase(GetCountryOrRegionUseCaseRef ref) {
   return GetCountryOrRegion(ref.watch(mapRepositoryProvider));
-});
+}
 
-class IssPositionNotifier extends AsyncNotifier<IssPosition> {
+@Riverpod(keepAlive: true)
+class IssPositionNotifier extends _$IssPositionNotifier {
   Timer? _timer;
 
   @override
@@ -63,25 +66,32 @@ class IssPositionNotifier extends AsyncNotifier<IssPosition> {
   }
 }
 
-final issPositionNotifierProvider =
-    AsyncNotifierProvider<IssPositionNotifier, IssPosition>(() {
-  return IssPositionNotifier();
-});
+@riverpod
+class TrackIss extends _$TrackIss {
+  @override
+  bool build() => false;
 
-final trackIssProvider = StateProvider<bool>((ref) {
-  return false; // Automatically follow ISS by default
-});
+  void toggle() {
+    state = !state;
+  }
 
-final issCountdownProvider = StreamProvider<int>((ref) async* {
+  void setTracking(bool value) {
+    state = value;
+  }
+}
+
+@riverpod
+Stream<int> issCountdown(IssCountdownRef ref) async* {
   ref.watch(issPositionNotifierProvider);
   yield 60;
   yield* Stream.periodic(
     const Duration(seconds: 1),
     (i) => 59 - i,
   ).take(60);
-});
+}
 
-final issCountryProvider = FutureProvider<String>((ref) async {
+@riverpod
+Future<String> issCountry(IssCountryRef ref) async {
   final issState = ref.watch(issPositionNotifierProvider);
   return issState.when(
     data: (position) async {
@@ -91,4 +101,4 @@ final issCountryProvider = FutureProvider<String>((ref) async {
     error: (err, stack) => 'Error loading location',
     loading: () => Completer<String>().future,
   );
-});
+}
